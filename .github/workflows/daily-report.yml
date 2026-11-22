@@ -1,6 +1,8 @@
 name: Günlük Portföy Raporu
 
 on:
+  push:
+    branches: ["main"]
   schedule:
     # Hafta içi her gün 18:30 (TR / UTC+3) -> 15:30 UTC (BIST kapanışı sonrası)
     - cron: "30 15 * * 1-5"
