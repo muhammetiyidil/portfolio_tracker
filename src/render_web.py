@@ -17,7 +17,7 @@ def _encrypt_payload(report: dict, pin: str) -> dict:
         algorithm=hashes.SHA256(),
         length=32,
         salt=salt,
-        iterations=100_000,
+        iterations=600_000,
     )
     key = kdf.derive(pin.encode("utf-8"))
     aesgcm = AESGCM(key)
@@ -972,7 +972,7 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
         "raw", enc.encode(pin), "PBKDF2", false, ["deriveKey"]
       );
       const key = await crypto.subtle.deriveKey(
-        {{ name: "PBKDF2", salt: b64ToBuf(PAYLOAD.salt), iterations: 100000, hash: "SHA-256" }},
+        {{ name: "PBKDF2", salt: b64ToBuf(PAYLOAD.salt), iterations: 600000, hash: "SHA-256" }},
         keyMaterial,
         {{ name: "AES-GCM", length: 256 }},
         false,

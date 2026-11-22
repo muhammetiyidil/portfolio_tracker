@@ -43,16 +43,19 @@ def main() -> None:
     email_html = render_email_html(report, dashboard_url=dashboard_url)
 
     (out_dir / "index.html").write_text(web_html, encoding="utf-8")
-    (out_dir / "email.html").write_text(email_html, encoding="utf-8")
     if not dashboard_pin:
+        (out_dir / "email.html").write_text(email_html, encoding="utf-8")
         (out_dir / "report.json").write_text(
             json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
         )
 
     tot_val = _fmt_try(report["total"]["current_value"], 0)
     tot_1d = _fmt_signed_pct(report["total"]["changes"]["1d"]["pct"])
-    print(f"[OK] Katalogdan {len(prices)} varlık çekildi -> {out_dir / 'index.html'}")
-    print(f"     Toplam: {tot_val} | 1G: {tot_1d}")
+    if dashboard_pin:
+        print(f"[OK] Katalogdan {len(prices)} varlık çekildi -> {out_dir / 'index.html'} (AES-GCM şifreli)")
+    else:
+        print(f"[OK] Katalogdan {len(prices)} varlık çekildi -> {out_dir / 'index.html'}")
+        print(f"     Toplam: {tot_val} | 1G: {tot_1d}")
 
     if args.send_email:
         subject = f"Portföy Raporu ({report['date_label']}): {tot_val} ({tot_1d})"
