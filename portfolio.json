@@ -1,0 +1,25 @@
+{
+  "currency": "TRY",
+  "holdings": [
+    {
+      "catalog_id": "kt_gram_altin",
+      "quantity": 12.5,
+      "cost_basis_total": 48000.0
+    },
+    {
+      "catalog_id": "kt_gram_gumus",
+      "quantity": 350.0,
+      "cost_basis_total": 24500.0
+    },
+    {
+      "catalog_id": "kt_klu",
+      "quantity": 5000.0,
+      "cost_basis_total": 25000.0
+    },
+    {
+      "catalog_id": "midas_glrmk",
+      "quantity": 250.0,
+      "cost_basis_total": 27000.0
+    }
+  ]
+}

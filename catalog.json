@@ -1,0 +1,35 @@
+{
+  "stores": [
+    {
+      "id": "kuveytturk",
+      "name": "Kuveyt Türk",
+      "items": [
+        { "id": "kt_gram_altin", "name": "Gram Altın", "type": "gold_gram", "symbol": "XAU_TRY_GRAM", "unit": "gram", "icon": "gold" },
+        { "id": "kt_gram_gumus", "name": "Gram Gümüş", "type": "silver_gram", "symbol": "XAG_TRY_GRAM", "unit": "gram", "icon": "silver" },
+        { "id": "kt_klu", "name": "KLU – Para Piyasası Katılım Fonu", "short_name": "KLU Fonu", "type": "tefas", "symbol": "KLU", "unit": "pay", "icon": "fund" },
+        { "id": "kt_kzl", "name": "KZL – Altın Katılım Fonu", "short_name": "KZL Fonu", "type": "tefas", "symbol": "KZL", "unit": "pay", "icon": "fund" },
+        { "id": "kt_ktv", "name": "KTV – Kısa Vadeli Kira Sertifikası", "short_name": "KTV Fonu", "type": "tefas", "symbol": "KTV", "unit": "pay", "icon": "fund" },
+        { "id": "kt_ktn", "name": "KTN – Kira Sertifikası Katılım Fonu", "short_name": "KTN Fonu", "type": "tefas", "symbol": "KTN", "unit": "pay", "icon": "fund" },
+        { "id": "kt_kpc", "name": "KPC – Katılım Hisse Senedi Fonu", "short_name": "KPC Fonu", "type": "tefas", "symbol": "KPC", "unit": "pay", "icon": "fund" }
+      ]
+    },
+    {
+      "id": "midas",
+      "name": "Midas",
+      "items": [
+        { "id": "midas_glrmk", "name": "GLRMK – Gülermak", "short_name": "Gülermak (GLRMK)", "type": "bist", "symbol": "GLRMK.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_glryh", "name": "GLRYH – Güler Yatırım Holding", "short_name": "GLRYH", "type": "bist", "symbol": "GLRYH.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_klser", "name": "KLSER – Kaleseramik", "short_name": "Kaleseramik (KLSER)", "type": "bist", "symbol": "KLSER.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_thyao", "name": "THYAO – Türk Hava Yolları", "short_name": "THYAO", "type": "bist", "symbol": "THYAO.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_asels", "name": "ASELS – Aselsan", "short_name": "ASELS", "type": "bist", "symbol": "ASELS.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_tuprs", "name": "TUPRS – Tüpraş", "short_name": "TUPRS", "type": "bist", "symbol": "TUPRS.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_bimas", "name": "BIMAS – BİM Mağazalar", "short_name": "BIMAS", "type": "bist", "symbol": "BIMAS.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_kchol", "name": "KCHOL – Koç Holding", "short_name": "KCHOL", "type": "bist", "symbol": "KCHOL.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_eregl", "name": "EREGL – Ereğli Demir Çelik", "short_name": "EREGL", "type": "bist", "symbol": "EREGL.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_sise", "name": "SISE – Şişecam", "short_name": "SISE", "type": "bist", "symbol": "SISE.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_froto", "name": "FROTO – Ford Otosan", "short_name": "FROTO", "type": "bist", "symbol": "FROTO.IS", "unit": "lot", "icon": "stock" },
+        { "id": "midas_astor", "name": "ASTOR – Astor Enerji", "short_name": "ASTOR", "type": "bist", "symbol": "ASTOR.IS", "unit": "lot", "icon": "stock" }
+      ]
+    }
+  ]
+}
