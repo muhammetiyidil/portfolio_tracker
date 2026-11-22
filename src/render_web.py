@@ -655,7 +655,7 @@ def render_web_html(report: dict) -> str:
                     <strong class="${{clsFor(a.changes.all.diff)}}">${{fmtSignedTRY(a.changes.all.diff, 0)}} (${{fmtSignedPct(a.changes.all.pct)}})</strong>
                   </div>
                   <div class="detail-row">
-                    <span>Birim Fiyat</span>
+                    <span>${{a.type === "gold_gram" || a.type === "silver_gram" ? "Birim Fiyat (Spot)" : "Birim Fiyat"}}</span>
                     <strong>${{fmtTRY(a.prices.current, 2)}}</strong>
                   </div>
                   <div class="detail-row">
@@ -735,7 +735,8 @@ def render_web_html(report: dict) -> str:
             <button class="ghost-btn" onclick="clearAllHoldings()">🗑 Tümünü Temizle</button>
           </div>
           Varlıkların yalnızca bu telefonun hafızasında (localStorage) saklanır.<br/>
-          Fiyatlar hafta içi her akşam otomatik güncellenir.
+          Fiyatlar hafta içi her akşam otomatik güncellenir.<br/>
+          Altın ve gümüşte banka alış-satış makası hariç uluslararası <strong>spot (orta)</strong> fiyat gösterilir.
         </div>
       `;
     }}
