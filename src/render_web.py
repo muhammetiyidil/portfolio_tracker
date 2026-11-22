@@ -1,43 +1,10 @@
 from __future__ import annotations
 
-import base64
 import json
-import os
-from typing import Optional
-
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
 
 
-def _encrypt_payload(report: dict, pin: str) -> dict:
-    salt = os.urandom(16)
-    iv = os.urandom(12)
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=600_000,
-    )
-    key = kdf.derive(pin.encode("utf-8"))
-    aesgcm = AESGCM(key)
-    plaintext = json.dumps(report, ensure_ascii=False).encode("utf-8")
-    ciphertext = aesgcm.encrypt(iv, plaintext, None)
-    return {
-        "encrypted": True,
-        "salt": base64.b64encode(salt).decode("ascii"),
-        "iv": base64.b64encode(iv).decode("ascii"),
-        "ciphertext": base64.b64encode(ciphertext).decode("ascii"),
-    }
-
-
-def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
-    if dashboard_pin:
-        payload = _encrypt_payload(report, dashboard_pin)
-    else:
-        payload = {"encrypted": False, "data": report}
-
-    payload_json = json.dumps(payload, ensure_ascii=False)
+def render_web_html(report: dict) -> str:
+    payload_json = json.dumps(report, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
 <html lang="tr">
@@ -452,40 +419,6 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
       z-index: 200;
     }}
     .toast.show {{ display: block; }}
-
-    .lock-screen {{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px 20px;
-      text-align: center;
-      margin-top: 40px;
-    }}
-    .lock-screen h2 {{ font-size: 20px; margin-bottom: 8px; }}
-    .lock-screen p {{ font-size: 13px; color: var(--muted); margin-bottom: 18px; }}
-    .lock-screen input {{
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 16px;
-      text-align: center;
-      margin-bottom: 12px;
-    }}
-    .lock-screen button {{
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      background: var(--green);
-      color: #06210E;
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-    }}
-    .lock-error {{ color: var(--red); font-size: 13px; margin-top: 10px; }}
   </style>
 </head>
 <body>
@@ -496,7 +429,7 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
   <div class="toast" id="toast"></div>
 
   <script>
-    const PAYLOAD = {payload_json};
+    const REPORT_DATA = {payload_json};
     const STORAGE_KEY = "portfolio_holdings_v2";
 
     const PERIOD_META = {{
@@ -584,7 +517,7 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
           if (Array.isArray(parsed)) return parsed;
         }} catch (e) {{}}
       }}
-      return (reportData.default_holdings || []).map(h => ({{ ...h }}));
+      return [];
     }}
 
     function saveHoldings() {{
@@ -798,11 +731,11 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
 
         <div class="footer">
           <div class="footer-actions">
-            <button class="ghost-btn" onclick="copySecretJson()">📋 PORTFOLIO_JSON Kopyala</button>
-            <button class="ghost-btn" onclick="resetDefaults()">↺ Varsayılana Dön</button>
+            <button class="ghost-btn" onclick="copyBackupJson()">📋 Yedek Kopyala</button>
+            <button class="ghost-btn" onclick="clearAllHoldings()">🗑 Tümünü Temizle</button>
           </div>
-          Değişiklikler telefonuna kaydedilir ve tüm sayfa anlık hesaplanır.<br/>
-          E-posta raporunun da aynı miktarları kullanması için JSON'u kopyalayıp GitHub Secret'a yapıştırabilirsin.
+          Varlıkların yalnızca bu telefonun hafızasında (localStorage) saklanır.<br/>
+          Fiyatlar hafta içi her akşam otomatik güncellenir.
         </div>
       `;
     }}
@@ -935,22 +868,22 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
       showToast(item.short_name + " kaydedildi");
     }};
 
-    window.copySecretJson = async function() {{
-      const obj = {{ currency: "TRY", holdings }};
-      const text = JSON.stringify(obj, null, 2);
+    window.copyBackupJson = async function() {{
+      const text = JSON.stringify(holdings, null, 2);
       try {{
         await navigator.clipboard.writeText(text);
-        showToast("PORTFOLIO_JSON kopyalandı!");
+        showToast("Portföy yedeği kopyalandı!");
       }} catch (e) {{
         prompt("Kopyala:", text);
       }}
     }};
 
-    window.resetDefaults = function() {{
+    window.clearAllHoldings = function() {{
+      if (!confirm("Tüm kayıtlı varlıklarını silmek istediğine emin misin?")) return;
       localStorage.removeItem(STORAGE_KEY);
-      holdings = loadHoldings();
+      holdings = [];
       renderApp();
-      showToast("Varsayılan portföye dönüldü");
+      showToast("Tüm varlıklar temizlendi");
     }};
 
     function bootstrapData(data) {{
@@ -965,69 +898,7 @@ def render_web_html(report: dict, dashboard_pin: Optional[str] = None) -> str:
       renderApp();
     }}
 
-    async function decryptWithPin(pin) {{
-      const b64ToBuf = (b) => Uint8Array.from(atob(b), c => c.charCodeAt(0));
-      const enc = new TextEncoder();
-      const keyMaterial = await crypto.subtle.importKey(
-        "raw", enc.encode(pin), "PBKDF2", false, ["deriveKey"]
-      );
-      const key = await crypto.subtle.deriveKey(
-        {{ name: "PBKDF2", salt: b64ToBuf(PAYLOAD.salt), iterations: 600000, hash: "SHA-256" }},
-        keyMaterial,
-        {{ name: "AES-GCM", length: 256 }},
-        false,
-        ["decrypt"]
-      );
-      const decrypted = await crypto.subtle.decrypt(
-        {{ name: "AES-GCM", iv: b64ToBuf(PAYLOAD.iv) }},
-        key,
-        b64ToBuf(PAYLOAD.ciphertext)
-      );
-      return JSON.parse(new TextDecoder().decode(decrypted));
-    }}
-
-    function renderLockScreen(errMsg = "") {{
-      document.getElementById("app").innerHTML = `
-        <div class="lock-screen">
-          <h2>🔒 Portföy Raporu Kilitli</h2>
-          <p>Verilerin şifrelenmiştir. Devam etmek için PIN kodunu gir.</p>
-          <input type="password" id="pin-input" placeholder="PIN / Şifre" autofocus />
-          <button onclick="unlock()">Aç</button>
-          ${{errMsg ? `<div class="lock-error">${{errMsg}}</div>` : ""}}
-        </div>
-      `;
-      const input = document.getElementById("pin-input");
-      input.addEventListener("keydown", (e) => {{ if (e.key === "Enter") unlock(); }});
-    }}
-
-    window.unlock = async function() {{
-      const pin = document.getElementById("pin-input").value;
-      try {{
-        const data = await decryptWithPin(pin);
-        localStorage.setItem("portfolio_pin", pin);
-        bootstrapData(data);
-      }} catch (e) {{
-        renderLockScreen("Hatalı PIN. Tekrar dene.");
-      }}
-    }};
-
-    (async function init() {{
-      if (!PAYLOAD.encrypted) {{
-        bootstrapData(PAYLOAD.data);
-        return;
-      }}
-      const savedPin = localStorage.getItem("portfolio_pin");
-      if (savedPin) {{
-        try {{
-          const data = await decryptWithPin(savedPin);
-          bootstrapData(data);
-          return;
-        }} catch (e) {{
-          localStorage.removeItem("portfolio_pin");
-        }}
-      }}
-      renderLockScreen();
-    }})();
+    bootstrapData(REPORT_DATA);
   </script>
 </body>
 </html>
